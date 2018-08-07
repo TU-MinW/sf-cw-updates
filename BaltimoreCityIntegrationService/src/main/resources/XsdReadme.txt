@@ -1,0 +1,2 @@
+## The JAXB command to run to produce CSR model classes from the Motorola CSR XSD.
+xjc -d "C:\Projects\BaltimoreCity\CSR\workspace-sts\BaltimoreCityIntegrationService\src\main\java\city\baltimore\eip\model\motorola\csr" -p city.baltimore.eip.model.motorola.csr "C:\Projects\BaltimoreCity\CSR\workspace-sts\BaltimoreCityIntegrationService\src\main\resources\csr.xsd"

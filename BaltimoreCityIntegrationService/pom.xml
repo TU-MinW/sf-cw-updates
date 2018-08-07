@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>city.baltimore.eip</groupId>
+	<artifactId>eip</artifactId>
+	<version>1.0.0-RELEASE</version>
+<!-- 	<packaging>jar</packaging> -->
+
+	<name>BaltimoreCityIntegrationService</name>
+	<description>Enterprise Integration Platform for the City</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.2.7.RELEASE</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<start-class>city.baltimore.eip.app.BaltimoreCityIntegrationServiceApplication</start-class>
+		<java.version>1.8</java.version>
+		
+		<!--** Application settings - set for development and overridden in profiles for other deployments - see application.properties and applicationContext.xml for use of these params **-->
+		<!-- Listening port for inbound HTTP -->
+		<server.port>8080</server.port>
+		<!-- <server.port>8080</server.port> -->
+		<ssl.properties.filelocation></ssl.properties.filelocation>
+		<!-- Inbound path for HTTP inbound from Motorola -->
+		<http.inbound.motorola>/motorola-csr-interface</http.inbound.motorola>
+		<!-- Inbound path for HTTP inbound from Cityworks to Motorola -->
+		<http.inbound.cityworks.activities>/cityworks-activities-inbound</http.inbound.cityworks.activities>
+		<!-- Inbound path for HTTP inbound from Cityworks to Salesforce -->
+		<http.inbound.cityworkssalesforce.activities>/cityworkssalesforce-activities-inbound</http.inbound.cityworkssalesforce.activities>
+		<!-- ActiveMQ connection string and settings -->
+		<spring.activemq.broker-url>tcp://localhost:61616</spring.activemq.broker-url>
+		<activemq.initialRedeliveryDelay>0</activemq.initialRedeliveryDelay>
+		<activemq.redeliveryDelay>60000</activemq.redeliveryDelay>
+		<activemq.maximumRedeliveries>3</activemq.maximumRedeliveries>
+		<!-- Cityworks -->
+		<!--  <cityworks.username>JMURK</cityworks.username>
+		<cityworks.password>MOTO123</cityworks.password>
+		-->
+		
+		<cityworks.username>baltimore/api.cityworks</cityworks.username>
+		<cityworks.password>r3#nb9uT!99</cityworks.password>
+		<!--
+		<cityworks.baseserviceurl>http://cityworks.kci.com/BaltimoreCityworks/Services</cityworks.baseserviceurl>
+		<cityworks.publicbaseserviceurl>http://cityworks.kci.com/BaltimoreCityworks/Services</cityworks.publicbaseserviceurl>
+		-->		
+		<cityworks.baseserviceurl>http://10.1.67.23/CityworksTest/Services</cityworks.baseserviceurl>
+		<cityworks.publicbaseserviceurl>https://cityworksdev.baltimorecity.gov/CityworksTest/Services</cityworks.publicbaseserviceurl>
+		<!-- Motorola -->
+		<motorola.apphub.userid>BALT_PRES</motorola.apphub.userid>
+		<motorola.apphub.password>JEFFERSON$$1</motorola.apphub.password>
+		<motorola.apphub.sourcecode>LOCWORKS</motorola.apphub.sourcecode>
+		<motorola.apphub.url>https://csrhub-311asp.motorolasolutions.com/HubServices/HubServices</motorola.apphub.url>
+		<!-- Salesforce -->
+		<!-- <salesforce.baseserviceurl>https://bal311-devint.herokuapp.com/311/v3</salesforce.baseserviceurl> -->
+		<salesforce.baseserviceurl>https://bal311-demo.herokuapp.com/311/v3</salesforce.baseserviceurl>
+		<!-- <salesforce.apikey>6S0I2bCmoEoQsHvyxj2NFANRnez/puCJCXLAzL5JH2k=</salesforce.apikey> -->
+		<salesforce.apikey>ca67d0f65d53e58e40c47d0c6726c50e855636e7bd48cea5a51cd93fc6c9c555</salesforce.apikey>
+		<salesforce.srclose.activtycode>11AAX-SRVCRESPON</salesforce.srclose.activtycode>
+		<salesforce.srclose.outcomecode>12AAX-CLOSBYAGCY</salesforce.srclose.outcomecode>
+		<salesforce.newrequest.pollinginterval>60000</salesforce.newrequest.pollinginterval>
+		<salesforce.newrequest.pollingperoiddate>2</salesforce.newrequest.pollingperoiddate>
+		<salesforce.newrequest.pollingperoidminute>2</salesforce.newrequest.pollingperoidminute>
+		<!-- ArcGIS -->
+		<arcgis.geometryserviceurl>https://cityworks.baltimorecity.gov/cwgis/rest/services/Utilities/Geometry/GeometryServer</arcgis.geometryserviceurl>
+		<arcgis.geometrysalesforceinsr>4326</arcgis.geometrysalesforceinsr>
+		<arcgis.geometrycityworksoutsr>2248</arcgis.geometrycityworksoutsr>
+		<!-- Cityworks SQL Server DB -->
+		<!-- <spring.datasource.url>jdbc:sqlserver://VM-CITYWORKSAMS:1433;databaseName=BALTIMORE_CITYWORKS</spring.datasource.url> -->
+		<!-- <spring.datasource.password>systems</spring.datasource.password> 
+		-->
+				
+		<spring.datasource.url>jdbc:sqlserver://169.156.41.175:1433;databaseName=DPW_Cityworks_Test</spring.datasource.url>
+		<spring.datasource.username>azteca</spring.datasource.username>
+		<spring.datasource.password>azteca</spring.datasource.password>
+		
+			
+		
+		
+		<!-- Period to poll Cityworks DB for SR status updates -->
+		<cityworks.db.statusupdate.pollinginterval>60000</cityworks.db.statusupdate.pollinginterval>
+	</properties>
+	
+	<!-- Override only the properties that need to be different in a profile for the target environment -->
+	<profiles>
+		<profile>
+			<id>kciserver</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<server.port>8443</server.port>
+				<ssl.properties.filelocation>classpath:ssl.properties</ssl.properties.filelocation>
+			</properties>
+		</profile>
+		<profile>
+			<id>balt-base</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<server.port>80</server.port>
+				<http.inbound.motorola>/csr-interface</http.inbound.motorola>
+				<cityworks.username>baltimore/api.cityworks</cityworks.username>
+				<cityworks.password>r3#nb9uT!99</cityworks.password>
+			</properties>
+		</profile>
+		<profile>
+			<id>balt-test</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<activemq.redeliveryDelay>1800000</activemq.redeliveryDelay>
+				<activemq.maximumRedeliveries>30</activemq.maximumRedeliveries>
+				<spring.datasource.url>jdbc:sqlserver://BALT-SQL-DEV:1433;databaseName=DPW_Cityworks152</spring.datasource.url>
+				<spring.datasource.password>azteca</spring.datasource.password>
+				<cityworks.baseserviceurl>http://DPW-CW2014-DEV/152Test/Services</cityworks.baseserviceurl>
+				<cityworks.publicbaseserviceurl>https://cityworksdev.baltimorecity.gov/152Test/Services</cityworks.publicbaseserviceurl>
+			</properties>
+		</profile>
+		<profile>
+			<id>balt-prod</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<motorola.apphub.userid>BALT_PROD</motorola.apphub.userid>
+				<activemq.redeliveryDelay>3600000</activemq.redeliveryDelay>
+				<activemq.maximumRedeliveries>25</activemq.maximumRedeliveries>
+				<spring.datasource.url>jdbc:sqlserver://BALT-SQL-FC:1433;databaseName=DPW_Cityworks</spring.datasource.url>
+				<spring.datasource.password>4GsY7fg9!p</spring.datasource.password>
+				<cityworks.baseserviceurl>http://DPW-CW2014-SRV/cityworks/Services</cityworks.baseserviceurl>
+				<cityworks.publicbaseserviceurl>https://cityworks.baltimorecity.gov/Cityworks/Services</cityworks.publicbaseserviceurl>
+			</properties>
+		</profile>
+		<profile>
+			<id>junit-test</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<spring.datasource.url>jdbc:sqlserver://169.156.41.175:1433;databaseName=DPW_Cityworks</spring.datasource.url>
+				<spring.datasource.password>azteca</spring.datasource.password>
+				<cityworks.baseserviceurl>http://10.1.67.23/CityworksTest/Services</cityworks.baseserviceurl>
+				<cityworks.publicbaseserviceurl>https://cityworksdev.baltimorecity.gov/CityworksTest/Services</cityworks.publicbaseserviceurl>
+			</properties>
+		</profile>
+	</profiles>
+
+	<!-- Bring in dependency for Spring Boot's web (MVC), enterprise integration, web service (SOAP), and testing support. No version, since setup by io platform below. -->
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-integration</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+        <!-- Testing dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-jmx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-jms</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-ws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-xml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<!-- SQL Server JDBC driver - see here for how to install in local Maven repository: http://claude.betancourt.us/add-microsoft-sql-jdbc-driver-to-maven/ -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>sqljdbc4</artifactId>
+			<version>4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-ws</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>wsdl4j</groupId>
+			<artifactId>wsdl4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+        <!-- Include ActiveMQ -->
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-core</artifactId>
+			<version>5.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-pool</artifactId>
+		</dependency>
+        <!-- Ehcache in-memory caching store -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+<!-- 		<dependency> -->
+<!--             <groupId>org.projectlombok</groupId> -->
+<!--             <artifactId>lombok</artifactId> -->
+<!--             <version>1.16.4</version> -->
+<!--             <scope>provided</scope> -->
+<!--         </dependency> -->
+	</dependencies>
+		
+    <!-- Transitively bring in the Spring IO Platform Bill-of-Materials `pom.xml`. This takes care of managing the library dependencies to make sure they work together. -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.spring.platform</groupId>
+				<artifactId>platform-bom</artifactId>
+				<version>1.1.4.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-compiler-plugin
+										</artifactId>
+										<versionRange>
+											[3.1,)
+										</versionRange>
+										<goals>
+											<goal>compile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>compile</execute>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-compiler-plugin
+										</artifactId>
+										<versionRange>
+											[3.1,)
+										</versionRange>
+										<goals>
+											<goal>testCompile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>test-compile</execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

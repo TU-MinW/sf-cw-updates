@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+	xmlns:int-http="http://www.springframework.org/schema/integration/http"
+	xmlns:int-ws="http://www.springframework.org/schema/integration/ws"
+	xmlns:web-services="http://www.springframework.org/schema/web-services"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
+	xmlns:int-file="http://www.springframework.org/schema/integration/file"
+	xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd
+		http://www.springframework.org/schema/web-services http://www.springframework.org/schema/web-services/web-services.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http.xsd
+		http://www.springframework.org/schema/integration/ws http://www.springframework.org/schema/integration/ws/spring-integration-ws.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/integration/jms http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+		http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd
+		http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+		http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+
+<!-- **** Configuration **** -->
+	<!-- Component scan to find all Spring components and instantiate via Dependency Injection. -->
+	<context:component-scan base-package="city.baltimore.eip" />
+
+	<!-- Caching setup -->
+	<!-- Let Spring know to cache some methods (in the repositories), and that the caching is defined by annotations on the methods. -->
+	<cache:annotation-driven />
+
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+		<property name="cacheManager" ref="ehcache" />
+	</bean>
+	<bean id="ehcache"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:ehcache.xml" />
+		<property name="shared" value="true" />
+	</bean>
+
+	<!-- The ActiveMQ connection factory for JMS messages. Get's auto-wired to any jms components below because of the "connectionFactory" id name. ActiveMQ serves as the Guaranteed Delivery mechanism. -->
+	<bean id="connectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory"
+		init-method="start" destroy-method="stop">
+		<property name="connectionFactory">
+			<bean class="org.apache.activemq.ActiveMQConnectionFactory">
+				<property name="brokerURL" value="${spring.activemq.broker-url}" />
+				<property name="nonBlockingRedelivery" value="true" />
+				<property name="redeliveryPolicy">
+					<bean class="org.apache.activemq.RedeliveryPolicy">
+						<property name="initialRedeliveryDelay" value="${activemq.initialRedeliveryDelay}" />
+						<property name="redeliveryDelay" value="${activemq.redeliveryDelay}" />
+						<property name="maximumRedeliveries" value="${activemq.maximumRedeliveries}" />
+						<property name="queue" value="*" />
+						<property name="topic" value="*" />
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="cityworksConnectionProperties" class="city.baltimore.eip.dao.CityworksEndpointSource">
+		<property name="cityworksUserName" value="${cityworks.username}" />
+		<property name="cityworksPassword" value="${cityworks.password}" />
+		<property name="cityworksBaseUrl" value="${cityworks.baseserviceurl}" />
+		<property name="cityworksPublicBaseUrl" value="${cityworks.publicbaseserviceurl}" />
+	</bean>
+
+	<bean id="motorolaCsrConnectionProperties" class="city.baltimore.eip.dao.MotorolaCsrEndpointSource">
+		<property name="appHubUserId" value="${motorola.apphub.userid}" />
+		<property name="appHubPassword" value="${motorola.apphub.password}" />
+		<property name="sourceCode" value="${motorola.apphub.sourcecode}" />
+		<property name="csrAppHubUrl" value="${motorola.apphub.url}" />
+	</bean>
+
+	<bean id="salesforceConnectionProperties" class="city.baltimore.eip.dao.SalesforceEndpointSource">
+		<property name="salesforceBaseUrl" value="${salesforce.baseserviceurl}" />
+		<property name="salesforceAPIKey" value="${salesforce.apikey}" />
+		<property name="srcloseActivtyCode" value="${salesforce.srclose.activtycode}" />
+		<property name="srcloseOutcomeCode" value="${salesforce.srclose.outcomecode}" />
+	</bean>
+
+	<bean id="salesforceBean" class="city.baltimore.eip.dao.SalesforceDao">
+	</bean>
+
+	<bean id="clientHttpRequestFactory"
+		class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+	</bean>	
+
+	<!-- <int:message-history/> -->
+<!-- **** End- Configuration **** -->
+
+
+<!-- **** CSR to City Pipe - including Cityworks URL return to CSR **** -->
+    <!-- Listen to an incoming HTTP request sent from the Motorola CSR App Hub event system for new CSRs. -->
+	<int-http:inbound-channel-adapter id="httpChannelAdapter"
+		channel="inputChannel" path="${http.inbound.motorola}"
+		supported-methods="POST">
+		<int-http:request-mapping consumes="text/xml" />
+	</int-http:inbound-channel-adapter>
+
+	<int:channel id="inputChannel">
+	</int:channel> 
+ 	
+    <!--
+        Define an adaptor that routes input messages to ActiveMQ; the outbound-channel-adapter
+        automagically finds the configured connectionFactory bean (by naming convention)
+      -->
+	<int-jms:outbound-channel-adapter
+		channel="inputChannel" destination-name="queue.newMotorolaCsr"
+		pub-sub-domain="false" />
+
+	<int-jms:message-driven-channel-adapter
+		id="messageDrivenAdapter" acknowledge="transacted" channel="listenerChannel"
+		destination-name="queue.newMotorolaCsr" pub-sub-domain="false" />
+                                            
+   	<!-- Create a channel for a listener that will consume new CSR- JMS messages-->
+	<int:channel id="listenerChannel" />
+ 	
+ 	<!-- Route the new versus updated service requests to different channels -->
+	<int-xml:xpath-router id="responderRouter"
+		input-channel="listenerChannel" default-output-channel="nullChannel"
+		resolution-required="false">
+		<int-xml:xpath-expression
+			expression="csreai:csreai-msg/csreai:header/csreai:eai_event_code"
+			ns-prefix="csreai" ns-uri="http://www.motorola.com/Schema/csreai" />
+		<int-xml:mapping value="NEWSR" channel="newSrInput" />
+	</int-xml:xpath-router>
+
+	<int:channel id="newSrInput" />
+    
+    <!-- Content filter to eliminate non-new CSR messages from Motorola -->
+    <!-- Split the order into items creating a new document for each item-->
+	<int-xml:xpath-splitter id="orderItemDocumentSplitter"
+		input-channel="newSrInput" output-channel="filteredInput"
+		create-documents="true">
+		<int-xml:xpath-expression expression="csreai:csreai-msg/csreai:body/Document"
+			ns-prefix="csreai" ns-uri="http://www.motorola.com/Schema/csreai" />
+	</int-xml:xpath-splitter>
+
+	<int:channel id="filteredInput" />
+    
+	<!-- The converter utility that will be used. See: http://docs.spring.io/autorepo/docs/spring/4.1.2.RELEASE/javadoc-api/org/springframework/oxm/jaxb/Jaxb2Marshaller.html -->
+	<bean id="marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+ 		<!-- This is the class or package to search for a class to convert the XML to. -->
+		<property name="contextPath" value="city.baltimore.eip.model.motorola.csr" />
+	</bean>
+	<int-xml:unmarshalling-transformer
+		id="csrUnmarshallingTransformer" input-channel="filteredInput"
+		output-channel="objOutput" unmarshaller="marshaller" />
+
+	<int:channel id="objOutput" /> 
+	
+	<!-- Check for and reject SRs that already have that Motorola ID in Cityworks -->
+	<int:filter input-channel="objOutput" output-channel="dedupedSrs">
+		<bean class="city.baltimore.eip.service.CityworksFilterMessageSelector" />
+	</int:filter>
+
+	<int:channel id="dedupedSrs" />
+   	
+   	<!-- Convert the Motorola CSR model to a Cityworks SR model -->
+	<int:service-activator input-channel="dedupedSrs"
+		output-channel="translatedCityworksObj" ref="csrToSrMappingServiceImpl"
+		method="TranslateToSr" />
+
+	<int:channel id="translatedCityworksObj" /> 
+	
+	<!-- Send the new service request to Cityworks -->
+	<int:service-activator input-channel="translatedCityworksObj"
+		ref="cityworksServiceImpl" method="InsertNewServiceRequest"
+		output-channel="returnedNewCityworksObj" />
+
+	<int:channel id="returnedNewCityworksObj" />
+ 	
+ 	<!-- Convert the response SR from Cityworks to a minimally-populated Motorola CSR model for sending back the Cityworks SR URL to Motorola -->
+	<int:service-activator input-channel="returnedNewCityworksObj"
+		output-channel="partialMotorolaObj" ref="csrToSrMappingServiceImpl"
+		method="TranslateToCsr" />
+
+	<int:channel id="partialMotorolaObj" />
+ 	
+ 	<!-- Convert the Motorola CSR Obj to an XML string -->
+	<int-xml:marshalling-transformer
+		input-channel="partialMotorolaObj" output-channel="outputCsrMarshaller"
+		marshaller="marshaller" result-type="StringResult" />
+
+	<int:channel id="outputCsrMarshaller" />
+    
+    <!-- Add in the SOAP message to the XML string -->
+	<int:service-activator input-channel="outputCsrMarshaller"
+		output-channel="fullCsrSoapMessage" ref="csrToSrMappingServiceImpl"
+		method="WrapCsrDocInSoapXml" />
+
+	<int:channel id="fullCsrSoapMessage" />	
+ 	
+    <!--
+        Define an adaptor that routes return messages to ActiveMQ; the outbound-channel-adapter
+        automagically finds the configured connectionFactory bean (by naming convention)
+      -->
+	<int-jms:outbound-channel-adapter
+		channel="fullCsrSoapMessage" destination-name="queue.newCityworksSr"
+		pub-sub-domain="false" />
+
+	<int-jms:message-driven-channel-adapter
+		id="messageDrivenAdapter1-2" acknowledge="transacted" channel="listenerChannel1-2"
+		destination-name="queue.newCityworksSr" pub-sub-domain="false" />
+
+	<int:channel id="listenerChannel1-2" />
+
+	<int:header-enricher input-channel="listenerChannel1-2"
+		output-channel="CsrWithHeader">
+		<int:header name="Content-Type" expression="'text/xml'" />
+	</int:header-enricher>
+
+	<int:channel id="CsrWithHeader" />
+
+	<int-http:outbound-channel-adapter
+		id="outboundToMotorolaCWUrl" url="#{motorolaCsrConnectionProperties.csrAppHubUrl}"
+		http-method="POST" mapped-request-headers="Content-Type" channel="CsrWithHeader"
+		charset="UTF-8" extract-payload="true" />
+<!-- **** End- CSR to City Pipe **** -->
+
+
+<!-- **** Cityworks SR status to CSR Pipe -->
+	<!-- The inbound adapter which polls the City DB for Service Request status updates in Cityworks. Update statement sets sent_to_csr to 1 for records in result set.
+		SELECT * FROM [Baltimore_Cityworks].[azteca].[REQUEST] where text4 = 'Motorola CSR';
+		SELECT * FROM [Baltimore_Cityworks].[azteca].[INTERFACE_CLOSED_SRS];
+		
+		Spring Boot automatically configures the dataSource (connection info) by naming convention - based on what was set in application.properties
+	 -->
+	<int-jdbc:inbound-channel-adapter
+		query="SELECT I.[ID],I.[CSRID],I.[STATUS],I.[DATETIMECLOSED],I.[SR_CODE] FROM [azteca].[INTERFACE_CLOSED_SRS] AS I JOIN [azteca].[REQUEST] AS R ON I.[REQUESTID]=R.[REQUESTID] WHERE R.[TEXT4] = 'Motorola CSR' AND (I.[SENT_TO_CSR] &lt;&gt; 1 or I.[SENT_TO_CSR] is null)"
+		row-mapper="closedCityworksServiceRequestrRowMapper" channel="inputStatusUpdates"
+		data-source="dataSource"
+		update="UPDATE [azteca].[INTERFACE_CLOSED_SRS] set [SENT_TO_CSR] = 1 where ID in (:ID)">
+		<int:poller fixed-rate="${cityworks.db.statusupdate.pollinginterval}"></int:poller>
+	</int-jdbc:inbound-channel-adapter>
+
+	<int:channel id="inputStatusUpdates" />
+	
+	<!-- Split multiple CSRs into individual messages. -->
+	<int:splitter input-channel="inputStatusUpdates"
+		output-channel="partialMotorolaObj2"></int:splitter>
+
+	<int:channel id="partialMotorolaObj2" />
+ 	
+ 	<!-- Convert the Motorola CSR Obj to an XML string -->
+	<int-xml:marshalling-transformer
+		input-channel="partialMotorolaObj2" output-channel="outputCsrMarshaller2"
+		marshaller="marshaller" result-type="StringResult" />
+
+	<int:channel id="outputCsrMarshaller2" />
+    
+    <!-- Add in the SOAP message to the XML string -->
+	<int:service-activator input-channel="outputCsrMarshaller2"
+		output-channel="fullCsrSoapMessage2" ref="csrToSrMappingServiceImpl"
+		method="WrapCsrDocInSoapXml" />
+
+	<int:channel id="fullCsrSoapMessage2" />
+	
+    <!--
+       Define an adaptor that routes input messages to ActiveMQ; the outbound-channel-adapter
+       automagically finds the configured connectionFactory bean (by naming convention)
+     -->
+	<int-jms:outbound-channel-adapter
+		channel="fullCsrSoapMessage2" destination-name="queue.cityworksSrStatusUpdate"
+		pub-sub-domain="false" />
+
+	<int-jms:message-driven-channel-adapter
+		id="messageDrivenAdapter2" acknowledge="transacted" channel="listenerChannel2"
+		destination-name="queue.cityworksSrStatusUpdate" pub-sub-domain="false" />
+
+	<int:channel id="listenerChannel2" />
+
+	<int:header-enricher id="headerEnricher2"
+		input-channel="listenerChannel2" output-channel="CsrWithHeader2">
+		<int:header name="Content-Type" expression="'text/xml'" />
+	</int:header-enricher>
+
+	<int:channel id="CsrWithHeader2" />
+
+	<int-http:outbound-channel-adapter
+		id="outboundToMotorolaCWUrl2" url="#{motorolaCsrConnectionProperties.csrAppHubUrl}"
+		http-method="POST" mapped-request-headers="Content-Type" channel="CsrWithHeader2"
+		charset="UTF-8" extract-payload="true" />
+<!-- **** End- Cityworks SR status to CSR Pipe -->
+
+
+<!-- **** Cityworks Activities to CSR Pipe -->
+	<int-http:inbound-channel-adapter id="httpChannelAdapter2"
+		channel="receiveChannel" path="${http.inbound.cityworks.activities}"
+		supported-methods="POST">
+		<int-http:request-mapping consumes="text/xml" />
+	</int-http:inbound-channel-adapter>
+
+	<int:channel id="receiveChannel" />
+   	
+   	<!-- Add in the SOAP message to the XML string  -->
+	<int:service-activator input-channel="receiveChannel"
+		output-channel="fullCsrSoapMessage3" ref="csrToSrMappingServiceImpl"
+		method="WrapCsrMsgInSoapXml" />
+
+	<int:channel id="fullCsrSoapMessage3" />
+   	
+   <!--
+      Define an adaptor that routes input messages to ActiveMQ; the outbound-channel-adapter
+      automagically finds the configured connectionFactory bean (by naming convention)
+    -->
+	<int-jms:outbound-channel-adapter
+		channel="fullCsrSoapMessage3" destination-name="queue.cityworksSrCommentsAndWorkOrders"
+		pub-sub-domain="false" />
+
+	<int-jms:message-driven-channel-adapter
+		id="messageDrivenAdapter3" acknowledge="transacted" channel="listenerChannel3"
+		destination-name="queue.cityworksSrCommentsAndWorkOrders"
+		pub-sub-domain="false" />
+
+	<int:channel id="listenerChannel3" />
+
+	<int:header-enricher id="headerEnricher3"
+		input-channel="listenerChannel3" output-channel="CsrWithHeader3">
+		<int:header name="Content-Type" expression="'text/xml'" />
+	</int:header-enricher>
+
+	<int:channel id="CsrWithHeader3" />
+
+	<int-http:outbound-channel-adapter
+		id="outboundToMotorolaCWUrl3" url="#{motorolaCsrConnectionProperties.csrAppHubUrl}"
+		http-method="POST" mapped-request-headers="Content-Type" channel="CsrWithHeader3"
+		charset="UTF-8" extract-payload="true" />
+<!-- **** Cityworks Activities to CSR Pipe -->
+
+
+<!-- **** Salesforce to City Pipe - including Cityworks return to Salesforce **** -->
+	<!-- The inbound adapter which polls the Salesforce for New Service Request. -->
+	<int:inbound-channel-adapter channel="getSalesforceRequests"
+		expression="''">
+		<int:poller fixed-rate="${salesforce.newrequest.pollinginterval}"></int:poller>
+	</int:inbound-channel-adapter>
+
+	<int-http:outbound-gateway id="salesforceRequestHttpGateway"
+		request-channel="getSalesforceRequests" url="{requesturl}?{params}"
+		http-method="GET" uri-variables-expression="@salesforceBean.getRequesturl()"
+		charset="UTF-8" reply-timeout="30000" reply-channel="salesforceInputChannel"
+		expected-response-type="java.lang.String">
+	</int-http:outbound-gateway>
+
+	<int:channel id="salesforceInputChannel" />
+
+	<int:json-to-object-transformer
+		input-channel="salesforceInputChannel" output-channel="salesforceQueryRequestObjs"
+		type="city.baltimore.eip.model.salesforce.SalesforceQueryRequest[]" />
+
+	<int:channel id="salesforceQueryRequestObjs" />
+
+	<!-- Split multiple Salesforce Requests into individual messages. -->
+	<int:splitter input-channel="salesforceQueryRequestObjs"
+		output-channel="salesforceQueryRequestObj"></int:splitter>
+
+	<int:channel id="salesforceQueryRequestObj" />
+
+	<!-- Check for and reject SRs that already have that service_request_id in Cityworks -->
+	<int:filter input-channel="salesforceQueryRequestObj"
+		output-channel="salesforceDedupedSr">
+		<bean
+			class="city.baltimore.eip.service.SalesforceCityworksFilterMessageSelector" />
+	</int:filter>
+
+	<int:channel id="salesforceDedupedSr" />
+
+	<!-- Get the details of Salesforce Request -->
+	<int:service-activator input-channel="salesforceDedupedSr"
+		output-channel="salesforceRequestObj" ref="salesforceServiceImpl"
+		method="SalesforceGetServiceRequestDetails" />
+
+	<int:channel id="salesforceRequestObj" />
+
+	<!-- Convert the Salesforce model to a Cityworks SR model -->
+	<int:service-activator input-channel="salesforceRequestObj"
+		output-channel="salesforceToCityworksObj" ref="csrToSrMappingServiceImpl"
+		method="SalesforceTranslateToSr" />
+
+	<int:channel id="salesforceToCityworksObj" />
+
+	<!-- Send the new service request to Cityworks -->
+	<int:service-activator input-channel="salesforceToCityworksObj"
+		output-channel="salesforceReturnedNewCityworksObj" ref="cityworksServiceImpl"
+		method="InsertNewServiceRequest" />
+
+	<int:channel id="salesforceReturnedNewCityworksObj" />
+
+	<!-- Convert the response SR from Cityworks to a minimally-populated Salesforce Request model
+		for sending back the Cityworks SR ID to Salesforce -->
+	<int:service-activator input-channel="salesforceReturnedNewCityworksObj"
+		output-channel="partialSalesforceExternalSystemObj" ref="csrToSrMappingServiceImpl"
+		method="TranslateToSalesforceExternalSystemObj" />
+
+	<int:channel id="partialSalesforceExternalSystemObj" />
+
+	<!-- Define an adaptor that routes return messages to ActiveMQ; the outbound-channel-adapter
+		automagically finds the configured connectionFactory bean (by naming convention) -->
+	<int-jms:outbound-channel-adapter
+		channel="partialSalesforceExternalSystemObj" destination-name="queue.newCityworksSalesforceSr"
+		pub-sub-domain="false" />
+
+	<int-jms:message-driven-channel-adapter
+		id="salesforceMessageDrivenAdapter1" acknowledge="transacted"
+		channel="salesforceListenerChannel1" destination-name="queue.newCityworksSalesforceSr"
+		pub-sub-domain="false" />
+
+	<int:channel id="salesforceListenerChannel1" />
+
+	<int:header-enricher input-channel="salesforceListenerChannel1"
+		output-channel="salesforceCsrWithHeader1">
+		<int:header name="Content-Type" value="application/x-www-form-urlencoded" />
+		<int:header name="salesforcerequestid" expression="payload.getRequestId()" />
+	</int:header-enricher>
+
+	<int:channel id="salesforceCsrWithHeader1" />
+
+	<int:object-to-map-transformer
+		input-channel="salesforceCsrWithHeader1" output-channel="salesforceExternalSystemPatchObj">
+	</int:object-to-map-transformer>
+
+	<int:channel id="salesforceExternalSystemPatchObj" />
+
+	<int-http:outbound-channel-adapter
+		id="outboundToSalesforceCWUrl1"
+		url="#{salesforceConnectionProperties.salesforceBaseUrl}/requests/{salesforcerequestid}.json"
+		http-method="PATCH" request-factory="clientHttpRequestFactory"
+		channel="salesforceExternalSystemPatchObj" charset="UTF-8"
+		mapped-request-headers="Content-Type" extract-payload="true">
+		<int-http:uri-variable name="salesforcerequestid"
+			expression="headers.salesforcerequestid" />
+	</int-http:outbound-channel-adapter>
+ <!-- **** End - Salesforce to City Pipe **** -->
+
+
+<!-- **** Cityworks SR status to Salesforce Pipe -->
+	<!-- The inbound adapter which polls the City DB for Service Request status updates in Cityworks. Update statement sets sent_to_csr to 1 for records in result set.
+		SELECT * FROM [Baltimore_Cityworks].[azteca].[REQUEST] where text4 = 'Salesforce';
+		SELECT * FROM [Baltimore_Cityworks].[azteca].[INTERFACE_CLOSED_SRS];
+		
+		Spring Boot automatically configures the dataSource (connection info) by naming convention - based on what was set in application.properties
+	 -->
+	<int-jdbc:inbound-channel-adapter
+		query="SELECT I.[ID],I.[CSRID],I.[STATUS],I.[DATETIMECLOSED],I.[SR_CODE] FROM [azteca].[INTERFACE_CLOSED_SRS] AS I JOIN [azteca].[REQUEST] AS R ON I.[REQUESTID]=R.[REQUESTID] WHERE R.[TEXT4] = 'Salesforce' AND (I.[SENT_TO_CSR] &lt;&gt; 1 or I.[SENT_TO_CSR] is null)"
+		row-mapper="salesforceClosedCityworksServiceRequestrRowMapper"
+		channel="inputSalesforceStatusUpdates" data-source="dataSource"
+		update="UPDATE [azteca].[INTERFACE_CLOSED_SRS] set [SENT_TO_CSR] = 1 where ID in (:cwTableId)">
+		<int:poller fixed-rate="${cityworks.db.statusupdate.pollinginterval}"> </int:poller>
+	</int-jdbc:inbound-channel-adapter>
+
+	<int:channel id="inputSalesforceStatusUpdates" />
+	
+	<!-- Split multiple CSRs into individual messages. -->
+	<int:splitter input-channel="inputSalesforceStatusUpdates"
+		output-channel="partialSalesforceStatusUpdateObj"></int:splitter>
+
+	<int:channel id="partialSalesforceStatusUpdateObj" />
+
+	<!-- Define an adaptor that routes return messages to ActiveMQ; the outbound-channel-adapter
+		automagically finds the configured connectionFactory bean (by naming convention) -->
+	<int-jms:outbound-channel-adapter
+		channel="partialSalesforceStatusUpdateObj" destination-name="queue.cityworksSalesforceSrStatusUpdate"
+		pub-sub-domain="false" />
+
+	<int-jms:message-driven-channel-adapter
+		id="salesforceMessageDrivenAdapter2" acknowledge="transacted"
+		channel="salesforceListenerChannel2" destination-name="queue.cityworksSalesforceSrStatusUpdate"
+		pub-sub-domain="false" />
+
+	<int:channel id="salesforceListenerChannel2" />
+
+	<int:header-enricher input-channel="salesforceListenerChannel2"
+		output-channel="salesforceCsrWithHeader2">
+		<int:header name="Content-Type" value="application/x-www-form-urlencoded" />
+		<int:header name="salesforcerequestid" expression="payload.getRequestId()" />
+	</int:header-enricher>
+
+	<int:channel id="salesforceCsrWithHeader2" />
+
+	<int:object-to-map-transformer
+		input-channel="salesforceCsrWithHeader2" output-channel="salesforceStatusUpdatePatchObj">
+	</int:object-to-map-transformer>
+
+	<int:channel id="salesforceStatusUpdatePatchObj" />
+
+	<int-http:outbound-channel-adapter
+		id="outboundToSalesforceCWUrl2"
+		url="#{salesforceConnectionProperties.salesforceBaseUrl}/requests/{salesforcerequestid}/activities/#{salesforceConnectionProperties.srcloseActivtyCode}.json"
+		http-method="PATCH" request-factory="clientHttpRequestFactory"
+		channel="salesforceStatusUpdatePatchObj" charset="UTF-8"
+		mapped-request-headers="Content-Type" extract-payload="true">
+		<int-http:uri-variable name="salesforcerequestid"
+			expression="headers.salesforcerequestid" />
+	</int-http:outbound-channel-adapter>
+<!-- **** End- Cityworks SR status to Salesforce Pipe -->
+
+<!-- **** Cityworks Comments to Salesforce Pipe --> <!-- /cityworkssalesforce-activities-inbound -->
+	
+	<!-- <int-jdbc:inbound-channel-adapter
+		query="SELECT [SALESFORCEREQUESTID],[COMMENT],[ID] FROM [azteca].[CSRCOMMENTSINTERFACE] WHERE ([SENT_TO_CSR]&lt;&gt; 1 or [SENT_TO_CSR] is null)"
+		row-mapper="salesforceCommentRowMapper"
+		channel="salesforceReceiveChannel" data-source="dataSource"
+		update="UPDATE [azteca].[CSRCOMMENTSINTERFACE] set [SENT_TO_CSR] = 1 where ID in (:cwTableId)">
+		<int:poller fixed-rate="${cityworks.db.statusupdate.pollinginterval}"></int:poller>
+	</int-jdbc:inbound-channel-adapter>
+	
+	<int:channel id="salesforceReceiveChannel" />
+	
+
+	Split multiple comments into individual messages.
+	<int:splitter input-channel="salesforceReceiveChannel"
+		output-channel="partialSalesforceCommentUpdateObj"></int:splitter>
+
+	<int:channel id="partialSalesforceCommentUpdateObj" /> -->
+   	
+	<!-- Convert Comments from Cityworks to a Salesforce Comments Update model -->
+<!-- 	<int:service-activator input-channel="partialSalesforceCommentUpdateObj"
+		output-channel="salesforceCaseCommentObj" ref="csrToSrMappingServiceImpl"
+		method="TranslateToSalesforceCommentObj" />
+
+	<int:channel id="salesforceCaseCommentObj" /> -->
+   	
+   <!-- Define an adaptor that routes input messages to ActiveMQ; the outbound-channel-adapter
+      automagically finds the configured connectionFactory bean (by naming convention) -->
+<!-- 	<int-jms:outbound-channel-adapter
+		channel="salesforceCaseCommentObj" destination-name="queue.cityworksSalesforceSrCommentsAndWorkOrders"
+		pub-sub-domain="false" />
+
+	<int-jms:message-driven-channel-adapter
+		id="salesforceMessageDrivenAdapter4" acknowledge="transacted"
+		channel="salesforceListenerChannel4" destination-name="queue.cityworksSalesforceSrCommentsAndWorkOrders"
+		pub-sub-domain="false" />
+
+	<int:channel id="salesforceListenerChannel4" />
+
+	<int:header-enricher input-channel="salesforceCaseCommentObj"
+		output-channel="salesforceCsrWithHeader3">
+		<int:header name="Content-Type" value="application/x-www-form-urlencoded" />
+		<int:header name="salesforcerequestid" expression="payload.getSalesforceRequestId()" />
+		<int:header name="salesforceactivitycode" expression="payload.getActivityCode()" />
+	</int:header-enricher>
+
+	<int:channel id="salesforceCsrWithHeader3" />
+
+	<int:object-to-map-transformer
+		input-channel="salesforceCsrWithHeader3" output-channel="salesforceCommentObj">
+	</int:object-to-map-transformer>
+
+	<int:channel id="salesforceCommentObj" />
+
+	<int-http:outbound-channel-adapter
+		id="outboundToSalesforceCWUrl3"
+		url="#{salesforceConnectionProperties.salesforceBaseUrl}/requests/{salesforcerequestid}/activities/#{salesforceConnectionProperties.srcloseActivtyCode}.json"
+		http-method="PATCH" request-factory="clientHttpRequestFactory"
+		channel="salesforceCommentObj" charset="UTF-8"
+		mapped-request-headers="Content-Type" extract-payload="true">
+		<int-http:uri-variable name="salesforcerequestid"
+			expression="headers.salesforcerequestid" />		
+	</int-http:outbound-channel-adapter> -->
+		
+<!-- **** Cityworks Comments to Salesforce Pipe -->
+
+
+<!-- **** Cityworks Activities to Salesforce Pipe -->
+	<int-http:inbound-channel-adapter id="salesforceRequestHttpChannelAdapter"
+		channel="salesforceReceiveChannel" path="${http.inbound.cityworkssalesforce.activities}"
+		supported-methods="POST" request-payload-type="java.lang.String">
+	</int-http:inbound-channel-adapter>
+
+	<int:channel id="salesforceReceiveChannel" />
+   	
+	<!-- Convert Activities from Cityworks to a Salesforce Activity Update model -->
+	<int:service-activator input-channel="salesforceReceiveChannel"
+		output-channel="salesforceActivitiesObj" ref="csrToSrMappingServiceImpl"
+		method="TranslateToSalesforceActivityObj" />
+
+	<int:channel id="salesforceActivitiesObj" />
+   	
+   <!-- Define an adaptor that routes input messages to ActiveMQ; the outbound-channel-adapter
+      automagically finds the configured connectionFactory bean (by naming convention) -->
+	<int-jms:outbound-channel-adapter
+		channel="salesforceActivitiesObj" destination-name="queue.cityworksSalesforceSrCommentsAndWorkOrders"
+		pub-sub-domain="false" />
+
+	<int-jms:message-driven-channel-adapter
+		id="salesforceMessageDrivenAdapter3" acknowledge="transacted"
+		channel="salesforceListenerChannel3" destination-name="queue.cityworksSalesforceSrCommentsAndWorkOrders"
+		pub-sub-domain="false" />
+
+	<int:channel id="salesforceListenerChannel3" />
+
+	<int:header-enricher input-channel="salesforceListenerChannel3"
+		output-channel="salesforceCsrWithHeader3">
+		<int:header name="Content-Type" value="application/x-www-form-urlencoded" />
+		<int:header name="salesforcerequestid" expression="payload.getRequestId()" />
+<!-- 		<int:header name="salesforceactivitycode" expression="payload.getActivityCode()" /> -->
+	</int:header-enricher>
+
+	<int:channel id="salesforceCsrWithHeader3" />
+
+	<int:object-to-map-transformer
+		input-channel="salesforceCsrWithHeader3" output-channel="salesforceActivitiesPatchObj">
+	</int:object-to-map-transformer>
+
+	<int:channel id="salesforceActivitiesPatchObj" />
+
+	<int-http:outbound-channel-adapter
+		id="outboundToSalesforceCWUrl3"
+		url="#{salesforceConnectionProperties.salesforceBaseUrl}/requests/{salesforcerequestid}/activities/{salesforceactivitycode}.json"
+		http-method="PATCH" request-factory="clientHttpRequestFactory"
+		channel="salesforceActivitiesPatchObj" charset="UTF-8"
+		mapped-request-headers="Content-Type" extract-payload="true">
+		<int-http:uri-variable name="salesforcerequestid"
+			expression="headers.salesforcerequestid" />
+		<!-- <int-http:uri-variable name="salesforceactivitycode"
+			expression="headers.salesforceactivitycode" /> -->
+	</int-http:outbound-channel-adapter>
+<!-- **** Cityworks Activities to Salesforce Pipe -->
+
+</beans>

@@ -1,0 +1,17 @@
+{
+	"EMERGNCY":"1"
+   , "URGENT":"2"
+   , "BPD":"3"
+   , "POLICE":"3"
+   , "SAFEZONE":"3"
+   , "SCHOOL":"3"
+   , "COUNCIL":"6"
+   , "PRIORITY":"6"
+   , "MAYOR":"8"
+   , "DIRECTOR":"7"
+   , "GATEWAY":"3"
+   , "PRIOR001":"0"
+   , "STANDARD":"3"
+   , "LOW":"5"
+   , "EMERGENCY":"1"
+}

@@ -1,0 +1,12 @@
+<!-- Used if need SOAP web service endpoints. Not needed in version 1 of service, but retaining for easier future use, if needed. -->
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- Ensures that all incoming requests will be routed to the ws:inbound-gateway -->
+	<bean class="org.springframework.ws.server.endpoint.mapping.UriEndpointMapping">
+		<property name="defaultEndpoint" ref="ws-inbound-gateway"/>
+	</bean>
+
+</beans>

@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <!-- BEGIN TOP-LEVEL ELEMENT -->
+  <xs:element name="Document">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Prc_instance" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!-- END TOP-LEVEL ELEMENT -->
+	<!-- RESET PARAMS -->
+	<xs:element name="Reset_params">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Reset_interface_code" type="xs:string"/>
+				<xs:element name="Reset_start_date" type="xs:string"/>
+				<xs:element name="Reset_stop_date" type="xs:string"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<!-- END RESET PARAMS -->
+  <!-- BEGIN PRC_INSTANCE -->
+  <xs:element name="Prc_instance">
+    <xs:complexType>
+      <xs:sequence>
+				<xs:element ref="Id"  minOccurs="0"/>
+				<xs:element ref="Manager_res_id"  minOccurs="0"/>
+				<xs:element ref="Method_received_code"  minOccurs="0"/>
+				<xs:element ref="Method_received_description"  minOccurs="0"/>
+				<xs:element ref="Prc_code"  minOccurs="0"/>
+				<xs:element ref="Prc_description"  minOccurs="0"/>
+				<xs:element ref="Priority_code"  minOccurs="0"/>
+				<xs:element ref="Priority_description"  minOccurs="0"/>
+				<xs:element ref="Owner_group_code"  minOccurs="0"/>
+				<xs:element ref="Owner_group_description"  minOccurs="0"/>
+				<xs:element ref="Jurisdiction_code"  minOccurs="0"/>
+				<xs:element ref="Jurisdiction_description"  minOccurs="0"/>
+				<xs:element ref="Creation_reason_code"  minOccurs="0"/>
+				<xs:element ref="Creation_reason_description"  minOccurs="0"/>
+				<xs:element ref="Status_code"  minOccurs="0"/>
+				<xs:element ref="Status_description"  minOccurs="0"/>
+				<xs:element ref="Status_date"  minOccurs="0"/>
+				<xs:element ref="Prc_number"  minOccurs="0"/>
+				<xs:element ref="Details"  minOccurs="0"/>
+				<xs:element ref="Begin_resolution_date"  minOccurs="0"/>
+				<xs:element ref="Duration_days_to_complete"  minOccurs="0"/>
+				<xs:element ref="Created_by"  minOccurs="0"/>
+				<xs:element ref="Created_by_description" minOccurs="0"/>
+				<xs:element ref="Created_date"  minOccurs="0"/>
+				<xs:element ref="Updated_by"  minOccurs="0"/>
+				<xs:element ref="Updated_by_description" minOccurs="0"/>
+				<xs:element ref="Updated_date"  minOccurs="0"/>
+				<xs:element ref="Record_version"  minOccurs="0"/>
+				<xs:element ref="Prc_attributes" minOccurs="0"/>
+				<xs:element ref="Prc_participants" minOccurs="0"/>
+				<xs:element ref="Prc_activities" minOccurs="0"/>
+				<xs:element ref="Prc_linked_processes" minOccurs="0"/>
+				<xs:element ref="Prc_historical_geo_areas" minOccurs="0"/>
+  			<xs:element ref="Geo_locations" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+  <xs:element name="Id" type="xs:integer"/>
+  <xs:element name="Manager_res_id" type="xs:integer"/>
+  <xs:element name="Method_received_code" type="xs:string"/>
+  <xs:element name="Method_received_description" type="xs:string"/>
+  <xs:element name="Prc_code" type="xs:string"/>
+  <xs:element name="Prc_description" type="xs:string"/>
+  <xs:element name="Priority_code" type="xs:string"/>
+  <xs:element name="Priority_description" type="xs:string"/>
+  <xs:element name="Owner_group_code" type="xs:string"/>
+  <xs:element name="Owner_group_description" type="xs:string"/>
+  <xs:element name="Jurisdiction_code" type="xs:string"/>
+  <xs:element name="Jurisdiction_description" type="xs:string"/>
+  <xs:element name="Creation_reason_code" type="xs:string"/>
+  <xs:element name="Creation_reason_description" type="xs:string"/>
+  <xs:element name="Status_code" type="xs:string"/>
+  <xs:element name="Status_description" type="xs:string"/>
+  <xs:element name="Status_date" type="xs:string"/>
+  <xs:element name="Prc_number" type="xs:string"/>
+  <xs:element name="Details" type="xs:string"/>
+  <xs:element name="Begin_resolution_date" type="xs:string"/>
+  <xs:element name="Duration_days_to_complete" type="xs:decimal"/>
+  <xs:element name="Created_by" type="xs:integer"/>
+  <xs:element name="Created_by_description" type="xs:string"/>
+  <xs:element name="Created_date" type="xs:string"/>
+  <xs:element name="Updated_by" type="xs:integer"/>
+  <xs:element name="Updated_by_description" type="xs:string"/>
+  <xs:element name="Updated_date" type="xs:string"/>
+  <xs:element name="Record_version" type="xs:integer"/>
+  <!-- END PRC_INSTANCE -->
+  <!-- BEGIN PRC_ATTRIBUTES -->
+	<xs:complexType name="prcAttributeType">
+		<xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Prc_attribute_def_id"  minOccurs="0"/>
+			<xs:element ref="Prc_instance_id"  minOccurs="0"/>
+			<xs:element ref="Attribute_value"  minOccurs="0"/>
+			<xs:element ref="Attribute_codes"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+			<xs:element ref="Prc_code" minOccurs="0"/>
+			<xs:element ref="Attribute_datatype_code" minOccurs="0"/>
+			<xs:element ref="Custom_attribute_defs_code" minOccurs="0"/>
+			<xs:element ref="Custom_attribute_defs_desc" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="prcAttributesType">
+		<xs:sequence>
+			<xs:element ref="Prc_attribute" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Prc_attributes" type="prcAttributesType"/>
+	<xs:element name="Prc_attribute" type="prcAttributeType"/>
+  <xs:element name="Prc_attribute_def_id" type="xs:integer"/>
+  <xs:element name="Prc_instance_id" type="xs:integer"/>
+  <xs:element name="Attribute_value" type="xs:string"/>
+  <xs:element name="Attribute_codes" type="xs:string"/>
+  <xs:element name="Attribute_datatype_code" type="xs:string"/>
+  <xs:element name="Custom_attribute_defs_code" type="xs:string"/>
+  <xs:element name="Custom_attribute_defs_desc" type="xs:string"/>
+  <!-- END PRC_ATTRIBUTES -->
+  <!-- BEGIN PRC_PARTICIPANTS -->
+	<xs:complexType name="prcParticipantType">
+		<xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Prc_instance_id"  minOccurs="0"/>
+			<xs:element ref="Prc_participant_def_id"  minOccurs="0"/>
+			<xs:element ref="Res_instance_id"  minOccurs="0"/>
+			<xs:element ref="Is_source_of_prc_ind"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+			<xs:element ref="Participant_code"  minOccurs="0"/>
+			<xs:element ref="Participant_description"  minOccurs="0"/>
+			<xs:element ref="Res_instance" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="prcParticipantsType">
+		<xs:sequence>
+			<xs:element ref="Prc_participant" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Prc_participants" type="prcParticipantsType"/>
+	<xs:element name="Prc_participant" type="prcParticipantType"/>
+  <xs:element name="Prc_participant_def_id" type="xs:integer"/>
+  <xs:element name="Res_instance_id" type="xs:integer"/>
+  <xs:element name="Is_source_of_prc_ind" type="xs:string"/>
+  <xs:element name="Participant_code" type="xs:string"/>
+  <xs:element name="Participant_description" type="xs:string"/>
+  <!-- END PRC_PARTICIPANTS -->
+  <!-- BEGIN RES_INSTANCE -->
+	<xs:complexType name="resInstanceType">
+		<xs:sequence>
+			<xs:element ref="Id" minOccurs="0"/>
+			<xs:element ref="Res_code"  minOccurs="0"/>
+			<xs:element ref="Res_description"  minOccurs="0"/>
+			<xs:element ref="Category_code"  minOccurs="0"/>
+			<xs:element ref="Owner_group_code"  minOccurs="0"/>
+			<xs:element ref="Owner_group_description"  minOccurs="0"/>
+			<xs:element ref="Start_date"  minOccurs="0"/>
+			<xs:element ref="Stop_date"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+			<xs:element ref="Geo_locations" minOccurs="0"/>
+			<xs:element ref="Res_names" minOccurs="0"/>
+			<xs:element ref="Res_attributes" minOccurs="0"/>
+			<xs:element ref="Res_phones" minOccurs="0"/>
+			<xs:element ref="Res_electronic_addresses" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Res_instance" type="resInstanceType"/>
+  <xs:element name="Res_code" type="xs:string"/>
+  <xs:element name="Res_description" type="xs:string"/>
+  <xs:element name="Category_code" type="xs:string"/>
+  <xs:element name="Start_date" type="xs:string"/>
+  <xs:element name="Stop_date" type="xs:string"/>
+  <!-- END RES_INSTANCE -->
+  <!-- BEGIN GEO_LOCATIONS -->
+	<xs:complexType name="locationType">
+		<xs:sequence>
+			<xs:element ref="Location_id"  minOccurs="0"/>
+			<xs:element ref="Display_address"  minOccurs="0"/>
+			<xs:element ref="Related_table_code"  minOccurs="0"/>
+			<xs:element ref="Related_record_id"  minOccurs="0"/>
+			<xs:element ref="Address_type_code"  minOccurs="0"/>
+			<xs:element ref="Country_code"  minOccurs="0"/>
+			<xs:element ref="Street_number"  minOccurs="0"/>
+			<xs:element ref="Prefix_direction_code"  minOccurs="0"/>
+			<xs:element ref="Prefix_type_code"  minOccurs="0"/>
+			<xs:element ref="Street_name"  minOccurs="0"/>
+			<xs:element ref="Street_type_code"  minOccurs="0"/>
+			<xs:element ref="Suffix_direction_code"  minOccurs="0"/>
+			<xs:element ref="City"  minOccurs="0"/>
+			<xs:element ref="District"  minOccurs="0"/>
+			<xs:element ref="Region"  minOccurs="0"/>
+			<xs:element ref="City_zone"  minOccurs="0"/>
+			<xs:element ref="Location_details"  minOccurs="0"/>
+			<xs:element ref="Building_name"  minOccurs="0"/>
+			<xs:element ref="Unit_number"  minOccurs="0"/>
+			<xs:element ref="Floor"  minOccurs="0"/>
+			<xs:element ref="X_value"  minOccurs="0"/>
+			<xs:element ref="Y_value"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="locationsType">
+		<xs:sequence>
+			<xs:element ref="Geo_location" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Geo_locations" type="locationsType"/>
+	<xs:element name="Geo_location" type="locationType"/>
+  <xs:element name="Location_id" type="xs:integer"/>
+  <xs:element name="Display_address" type="xs:string"/>
+  <xs:element name="Related_table_code" type="xs:string"/>
+  <xs:element name="Related_record_id" type="xs:integer"/>
+  <xs:element name="Address_type_code" type="xs:string"/>
+  <xs:element name="Country_code" type="xs:string"/>
+  <xs:element name="Street_number" type="xs:string"/>
+  <xs:element name="Prefix_direction_code" type="xs:string"/>
+  <xs:element name="Prefix_type_code" type="xs:string"/>
+  <xs:element name="Street_name" type="xs:string"/>
+  <xs:element name="Street_type_code" type="xs:string"/>
+  <xs:element name="Suffix_direction_code" type="xs:string"/>
+  <xs:element name="City" type="xs:string"/>
+  <xs:element name="District" type="xs:string"/>
+  <xs:element name="Region" type="xs:string"/>
+  <xs:element name="City_zone" type="xs:string"/>
+  <xs:element name="Location_details" type="xs:string"/>
+  <xs:element name="Building_name" type="xs:string"/>
+  <xs:element name="Unit_number" type="xs:string"/>
+  <xs:element name="Floor" type="xs:string"/>
+  <xs:element name="X_value" type="xs:decimal"/>
+  <xs:element name="Y_value" type="xs:decimal"/>
+  <!-- END GEO_LOCATIONS -->
+  <!-- BEGIN RES_NAMES -->
+  <xs:complexType name="resNameType">
+    <xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Res_instance_id"  minOccurs="0"/>
+			<xs:element ref="Owner_group_code"  minOccurs="0"/>
+			<xs:element ref="Owner_group_description"  minOccurs="0"/>
+			<xs:element ref="Name_type_item_code"  minOccurs="0"/>
+			<xs:element ref="Name_type_item_description"  minOccurs="0"/>
+			<xs:element ref="Display_name"  minOccurs="0"/>
+			<xs:element ref="Search_display_name"  minOccurs="0"/>
+			<xs:element ref="Name_field_01"  minOccurs="0"/>
+			<xs:element ref="Name_field_02"  minOccurs="0"/>
+			<xs:element ref="Name_field_03"  minOccurs="0"/>
+			<xs:element ref="Name_field_04"  minOccurs="0"/>
+			<xs:element ref="Name_field_05"  minOccurs="0"/>
+			<xs:element ref="Name_field_06"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="resNamesType">
+		<xs:sequence>
+			<xs:element ref="Res_name" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Res_names" type="resNamesType"/>
+	<xs:element name="Res_name" type="resNameType"/>
+  <xs:element name="Name_type_item_code" type="xs:string"/>
+  <xs:element name="Name_type_item_description" type="xs:string"/>
+  <xs:element name="Display_name" type="xs:string"/>
+  <xs:element name="Search_display_name" type="xs:string"/>
+  <xs:element name="Name_field_01" type="xs:string"/>
+  <xs:element name="Name_field_02" type="xs:string"/>
+  <xs:element name="Name_field_03" type="xs:string"/>
+  <xs:element name="Name_field_04" type="xs:string"/>
+  <xs:element name="Name_field_05" type="xs:string"/>
+  <xs:element name="Name_field_06" type="xs:string"/>
+  <!-- END RES_NAMES -->
+  <!-- BEGIN RES_ATTRIBUTES -->
+  <xs:complexType name="resAttributeType">
+    <xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Res_instance_id"  minOccurs="0"/>
+			<xs:element ref="Type_custom_attribute_id"  minOccurs="0"/>
+			<xs:element ref="Attribute_value"  minOccurs="0"/>
+			<xs:element ref="Attribute_codes"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="resAttributesType">
+		<xs:sequence>
+			<xs:element ref="Res_attribute" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Res_attributes" type="resAttributesType"/>
+	<xs:element name="Res_attribute" type="resAttributeType"/>
+  <xs:element name="Type_custom_attribute_id" type="xs:integer"/>
+  <!-- END RES_ATTRIBUTES -->
+  <!-- BEGIN RES_PHONES -->
+  <xs:complexType name="resPhoneType">
+    <xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Res_instance_id"  minOccurs="0"/>
+			<xs:element ref="Phone_code"  minOccurs="0"/>
+			<xs:element ref="Phone_description"  minOccurs="0"/>
+			<xs:element ref="Phone_number"  minOccurs="0"/>
+			<xs:element ref="Extension"  minOccurs="0"/>
+			<xs:element ref="Details"  minOccurs="0"/>
+			<xs:element ref="Private_ind"  minOccurs="0"/>
+			<xs:element ref="Phone_number_no_format"  minOccurs="0"/>
+			<xs:element ref="Start_date"  minOccurs="0"/>
+			<xs:element ref="Stop_date"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="resPhonesType">
+		<xs:sequence>
+			<xs:element ref="Res_phone" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Res_phones" type="resPhonesType"/>
+	<xs:element name="Res_phone" type="resPhoneType"/>
+  <xs:element name="Phone_code" type="xs:string"/>
+  <xs:element name="Phone_description" type="xs:string"/>
+  <xs:element name="Phone_number" type="xs:string"/>
+  <xs:element name="Extension" type="xs:string"/>
+  <xs:element name="Private_ind" type="xs:string"/>
+  <xs:element name="Phone_number_no_format" type="xs:string"/>
+  <!-- END RES_PHONES -->
+  <!-- BEGIN RES_ELECTRONIC_ADDRESSES -->
+  <xs:complexType name="resElectronicAddressType">
+    <xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Res_instance_id"  minOccurs="0"/>
+			<xs:element ref="Electronic_address_code"  minOccurs="0"/>
+			<xs:element ref="Electronic_address_description"  minOccurs="0"/>
+			<xs:element ref="Message_device_code"  minOccurs="0"/>
+			<xs:element ref="Message_device_description"  minOccurs="0"/>
+			<xs:element ref="Electronic_address"  minOccurs="0"/>
+			<xs:element ref="Email_addressable_ind"  minOccurs="0"/>
+			<xs:element ref="Private_ind"  minOccurs="0"/>
+			<xs:element ref="Details"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="resElectronicAddressesType">
+		<xs:sequence>
+			<xs:element ref="Res_electronic_address" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Res_electronic_addresses" type="resElectronicAddressesType"/>
+	<xs:element name="Res_electronic_address" type="resElectronicAddressType"/>
+  <xs:element name="Electronic_address_code" type="xs:string"/>
+  <xs:element name="Electronic_address_description" type="xs:string"/>
+  <xs:element name="Message_device_code" type="xs:string"/>
+  <xs:element name="Message_device_description" type="xs:string"/>
+  <xs:element name="Electronic_address" type="xs:string"/>
+  <xs:element name="Email_addressable_ind" type="xs:string"/>
+  <!-- END RES_ELECTRONIC_ADDRESSES -->
+  <!-- BEGIN PRC_ACTIVITIES -->
+	<xs:complexType name="prcActivityType">
+		<xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Prc_instance_id"  minOccurs="0"/>
+			<xs:element ref="Assign_res_id"  minOccurs="0"/>
+			<xs:element ref="Outcome_code"  minOccurs="0"/>
+			<xs:element ref="Outcome_description"  minOccurs="0"/>
+			<xs:element ref="Prc_activity_defs_id"  minOccurs="0"/>
+			<xs:element ref="Completed_date"  minOccurs="0"/>
+			<xs:element ref="Details"  minOccurs="0"/>
+			<xs:element ref="Preceded_prc_activity_id"  minOccurs="0"/>
+			<xs:element ref="Arrival_time"  minOccurs="0"/>
+			<xs:element ref="Departure_time"  minOccurs="0"/>
+			<xs:element ref="Due_date"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+			<xs:element ref="Prc_activity_type_defs_code"  minOccurs="0"/>
+			<xs:element ref="Description_actdef"  minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="prcActivitiesType">
+		<xs:sequence>
+			<xs:element ref="Prc_activity" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Prc_activities" type="prcActivitiesType"/>
+	<xs:element name="Prc_activity" type="prcActivityType"/>
+  <xs:element name="Assign_res_id" type="xs:integer"/>
+  <xs:element name="Outcome_code" type="xs:string"/>
+  <xs:element name="Outcome_description" type="xs:string"/>
+  <xs:element name="Prc_activity_defs_id" type="xs:integer"/>
+  <xs:element name="Completed_date" type="xs:string"/>
+  <xs:element name="Preceded_prc_activity_id" type="xs:integer"/>
+  <xs:element name="Arrival_time" type="xs:string"/>
+  <xs:element name="Departure_time" type="xs:string"/>
+  <xs:element name="Due_date" type="xs:string"/>
+  <xs:element name="Prc_activity_type_defs_code" type="xs:string"/>
+  <xs:element name="Description_actdef" type="xs:string"/>
+  <!-- END PRC_ACTIVITIES -->
+  <!-- BEGIN PRC_LINKED_PROCESSES -->
+	<xs:complexType name="prcLinkedProcessType">
+		<xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Child_prc_instance_id"  minOccurs="0"/>
+			<xs:element ref="Parent_prc_instance_id"  minOccurs="0"/>
+			<xs:element ref="Linked_prc_number"  minOccurs="0"/>
+			<xs:element ref="Linked_prc_code"  minOccurs="0"/>
+			<xs:element ref="Unlinked_reason_code"  minOccurs="0"/>
+			<xs:element ref="Unlinked_reason_description"  minOccurs="0"/>
+			<xs:element ref="Linked_reason_code"  minOccurs="0"/>
+			<xs:element ref="Linked_reason_description"  minOccurs="0"/>
+			<xs:element ref="Parent_activity_id"  minOccurs="0"/>
+			<xs:element ref="Unlinked_date"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="prcLinkedProcessesType">
+		<xs:sequence>
+			<xs:element ref="Prc_linked_process" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Prc_linked_processes" type="prcLinkedProcessesType"/>
+	<xs:element name="Prc_linked_process" type="prcLinkedProcessType"/>
+  <xs:element name="Child_prc_instance_id" type="xs:integer"/>
+  <xs:element name="Parent_prc_instance_id" type="xs:integer"/>
+  <xs:element name="Linked_prc_number" type="xs:string"/>
+  <xs:element name="Linked_prc_code" type="xs:string"/>
+  <xs:element name="Unlinked_reason_code" type="xs:string"/>
+  <xs:element name="Unlinked_reason_description" type="xs:string"/>
+  <xs:element name="Linked_reason_code" type="xs:string"/>
+  <xs:element name="Linked_reason_description" type="xs:string"/>
+  <xs:element name="Parent_activity_id" type="xs:integer"/>
+  <xs:element name="Unlinked_date" type="xs:string"/>
+  <!-- END PRC_LINKED_PROCESSES -->
+  <!-- BEGIN PRC_HISTORICAL_GEO_AREAS -->
+	<xs:complexType name="prcHistoricalGeoAreaType">
+		<xs:sequence>
+			<xs:element ref="Id"  minOccurs="0"/>
+			<xs:element ref="Prc_instance_id"  minOccurs="0"/>
+			<xs:element ref="Config_location_code"  minOccurs="0"/>
+			<xs:element ref="Config_location_description"  minOccurs="0"/>
+			<xs:element ref="Config_location_value"  minOccurs="0"/>
+			<xs:element ref="Created_by"  minOccurs="0"/>
+			<xs:element ref="Created_date"  minOccurs="0"/>
+			<xs:element ref="Updated_by"  minOccurs="0"/>
+			<xs:element ref="Updated_date"  minOccurs="0"/>
+			<xs:element ref="Record_version"  minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="prcHistoricalGeoAreasType">
+		<xs:sequence>
+			<xs:element ref="Prc_historical_geo_area" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Prc_historical_geo_areas" type="prcHistoricalGeoAreasType"/>
+	<xs:element name="Prc_historical_geo_area" type="prcHistoricalGeoAreaType"/>
+  <xs:element name="Config_location_code" type="xs:string"/>
+  <xs:element name="Config_location_description" type="xs:string"/>
+  <xs:element name="Config_location_value" type="xs:string"/>
+  <!-- END PRC_HISTORICAL_GEO_AREAS -->
+</xs:schema>

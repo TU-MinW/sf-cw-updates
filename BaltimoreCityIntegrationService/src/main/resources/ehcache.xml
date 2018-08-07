@@ -1,0 +1,21 @@
+<!-- The EHCache configuration for in-memory method caching. -->
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="ehcache.xsd">
+
+	<cache name="cityworksservicerequestproblemnames"
+		maxEntriesLocalHeap="10000" timeToLiveSeconds="600">
+	</cache>
+
+	<cache name="cityworksservicerequestproblemqavalue"
+		maxEntriesLocalHeap="10000" timeToLiveSeconds="600">
+	</cache>
+
+	<cache name="cityworkscsrprioritymappings" maxEntriesLocalHeap="20"
+		timeToLiveSeconds="600">
+	</cache>
+
+	<cache name="cityworkssalesforcequestionanswermappings"
+		maxEntriesLocalHeap="50" timeToLiveSeconds="600">
+	</cache>
+
+</ehcache>
